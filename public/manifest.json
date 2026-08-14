@@ -1,0 +1,22 @@
+{
+  "name": "Finanzas",
+  "short_name": "Finanzas",
+  "description": "Tu patrimonio, tus gastos, tu evolución.",
+  "start_url": "/resumen",
+  "display": "standalone",
+  "background_color": "#0B0D10",
+  "theme_color": "#0B0D10",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
