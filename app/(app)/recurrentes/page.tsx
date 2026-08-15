@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { Plus, Repeat, Pause, Play, Trash2 } from "lucide-react";
 import { colorForLabel } from "@/lib/colors";
@@ -9,20 +10,17 @@ export default async function RecurrentesPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Traer recurrentes SIN join (para evitar el error de relación)
   const { data: recurrings } = await supabase
     .from("recurring_transactions")
     .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
-  // Traer cuentas y categorías por separado
   const [{ data: accounts }, { data: categories }] = await Promise.all([
     supabase.from("accounts").select("id, name").eq("user_id", user.id),
     supabase.from("categories").select("id, name, icon").eq("user_id", user.id),
   ]);
 
-  // Crear mapas para buscar rápido
   const accountMap = new Map(accounts?.map((a) => [a.id, a.name]) ?? []);
   const categoryMap = new Map(
     categories?.map((c) => [c.id, { name: c.name, icon: c.icon }]) ?? []
@@ -108,12 +106,34 @@ export default async function RecurrentesPage() {
               </div>
 
               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
-                <ToggleRecurringButton id={r.id} isActive={r.is_active} />
+                <form
+                  action={async () => {
+                    "use server";
+                    const supabase = await createClient();
+                    await supabase
+                      .from("recurring_transactions")
+                      .update({ is_active: !r.is_active })
+                      .eq("id", r.id);
+                    revalidatePath("/recurrentes");
+                  }}
+                >
+                  <button
+                    type="submit"
+                    className={`flex items-center gap-1 text-xs transition ${
+                      r.is_active ? "text-muted hover:text-amber-400" : "text-muted hover:text-positive"
+                    }`}
+                  >
+                    {r.is_active ? <Pause size={12} /> : <Play size={12} />}
+                    {r.is_active ? "Pausar" : "Reactivar"}
+                  </button>
+                </form>
+
                 <form
                   action={async () => {
                     "use server";
                     const supabase = await createClient();
                     await supabase.from("recurring_transactions").delete().eq("id", r.id);
+                    revalidatePath("/recurrentes");
                   }}
                 >
                   <button
@@ -130,30 +150,5 @@ export default async function RecurrentesPage() {
         })}
       </div>
     </main>
-  );
-}
-
-function ToggleRecurringButton({ id, isActive }: { id: string; isActive: boolean }) {
-  return (
-    <form
-      action={async () => {
-        "use server";
-        const supabase = await createClient();
-        await supabase
-          .from("recurring_transactions")
-          .update({ is_active: !isActive })
-          .eq("id", id);
-      }}
-    >
-      <button
-        type="submit"
-        className={`flex items-center gap-1 text-xs transition ${
-          isActive ? "text-muted hover:text-amber-400" : "text-muted hover:text-positive"
-        }`}
-      >
-        {isActive ? <Pause size={12} /> : <Play size={12} />}
-        {isActive ? "Pausar" : "Reactivar"}
-      </button>
-    </form>
   );
 }
