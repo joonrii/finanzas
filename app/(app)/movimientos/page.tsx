@@ -48,13 +48,23 @@ export default async function MovimientosPage() {
                   const account = Array.isArray(t.accounts)
                     ? t.accounts[0]
                     : t.accounts;
-                  const isPositive = t.type === "income";
+                  const isPositive =
+                    t.type === "income" ||
+                    (t.type === "balance_adjustment" && Number(t.amount) > 0);
                   const sign =
-                    t.type === "expense" ||
-                    t.type === "transfer" ||
-                    t.type === "investment"
+                    t.type === "balance_adjustment"
+                      ? Number(t.amount) >= 0
+                        ? "+"
+                        : "-"
+                      : t.type === "expense" ||
+                        t.type === "transfer" ||
+                        t.type === "investment"
                       ? "-"
                       : "+";
+                  const displayAmount =
+                    t.type === "balance_adjustment"
+                      ? Math.abs(Number(t.amount))
+                      : Number(t.amount);
 
                   return (
                     <li
@@ -68,14 +78,18 @@ export default async function MovimientosPage() {
                               ? "↔️"
                               : t.type === "investment"
                               ? "📈"
+                              : t.type === "balance_adjustment"
+                              ? "⚖️"
                               : "💳")}
                         </span>
                         <div className="min-w-0">
                           <p className="text-sm truncate">
-                            {t.merchant ||
-                              t.description ||
-                              category?.name ||
-                              "Movimiento"}
+                            {t.type === "balance_adjustment"
+                              ? "Ajuste de saldo"
+                              : t.merchant ||
+                                t.description ||
+                                category?.name ||
+                                "Movimiento"}
                           </p>
                           <p className="text-muted text-xs truncate">
                             {account?.name}
@@ -90,7 +104,7 @@ export default async function MovimientosPage() {
                           }
                         >
                           {sign}
-                          {Number(t.amount).toFixed(2)} €
+                          {displayAmount.toFixed(2)} €
                         </p>
                         <DeleteTransactionButton
                           id={t.id}

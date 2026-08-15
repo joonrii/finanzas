@@ -44,20 +44,22 @@ export default async function CuentasPage() {
           {accounts.map((a) => {
             const balance = a.calculated_balance;
             return (
-              <li
-                key={a.id}
-                className="bg-surface border border-border rounded-xl px-4 py-3 flex justify-between items-center"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-lg">
-                    {PROVIDER_LABEL[a.provider ?? ""] ??
-                      (a.type === "cash" ? "💵" : "🏛️")}
-                  </span>
-                  <p className="text-sm">{a.name}</p>
-                </div>
-                <p className="money text-sm font-medium">
-                  {Number(balance).toFixed(2)} €
-                </p>
+              <li key={a.id}>
+                <Link
+                  href={`/cuentas/${a.id}`}
+                  className="bg-surface border border-border rounded-xl px-4 py-3 flex justify-between items-center"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg">
+                      {PROVIDER_LABEL[a.provider ?? ""] ??
+                        (a.type === "cash" ? "💵" : "🏛️")}
+                    </span>
+                    <p className="text-sm">{a.name}</p>
+                  </div>
+                  <p className="money text-sm font-medium">
+                    {Number(balance).toFixed(2)} €
+                  </p>
+                </Link>
               </li>
             );
           })}
