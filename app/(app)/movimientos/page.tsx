@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteTransactionButton } from "@/components/transactions/DeleteTransactionButton";
 
@@ -16,7 +17,15 @@ export default async function MovimientosPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-medium">Movimientos</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-medium">Movimientos</h1>
+        <Link
+          href="/movimientos/importar"
+          className="text-positive text-sm font-medium"
+        >
+          Importar CSV
+        </Link>
+      </div>
 
       {!transactions || transactions.length === 0 ? (
         <div className="bg-surface border border-border rounded-2xl p-6 text-center">
