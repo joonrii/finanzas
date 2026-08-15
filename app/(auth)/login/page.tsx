@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Wallet } from "lucide-react";
+import { Wallet, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,89 +36,120 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-dvh flex flex-col justify-center items-center px-6 py-12 relative overflow-hidden">
-      {/* Glow verde decorativo */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+    <main className="min-h-dvh flex items-center justify-center relative overflow-hidden bg-[#050505] px-6 py-12">
+      {/* Fondo degradado animado */}
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/30 via-black to-teal-950/20" />
+      
+      {/* Blobs flotantes */}
+      <div className="absolute -top-20 -left-20 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px] animate-float" />
+      <div className="absolute -bottom-20 -right-20 w-[400px] h-[400px] bg-teal-500/15 rounded-full blur-[100px] animate-float-reverse" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-lime-500/10 rounded-full blur-[90px] animate-float" style={{ animationDelay: '5s' }} />
+      
+      {/* Línea brillante inferior */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
 
-      <div className="w-full max-w-sm relative z-10">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="relative mb-4">
-            <div className="absolute inset-0 bg-emerald-500/20 rounded-2xl blur-xl" />
-            <div className="relative w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Wallet className="w-8 h-8 text-black" strokeWidth={2.5} />
+      {/* Tarjeta de cristal */}
+      <div 
+        className="relative z-10 w-full max-w-[420px] opacity-0 animate-fade-in-up"
+        style={{ animationDelay: '0.1s' }}
+      >
+        <div className="backdrop-blur-2xl bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 shadow-2xl shadow-black/50">
+          
+          {/* Logo */}
+          <div className="flex flex-col items-center mb-10">
+            <div 
+              className="relative mb-5 opacity-0 animate-fade-in-up delay-200"
+            >
+              <div className="absolute inset-0 bg-emerald-500/30 rounded-2xl blur-2xl" />
+              <div className="relative w-[72px] h-[72px] bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.35)]">
+                <Wallet className="w-9 h-9 text-black" strokeWidth={2} />
+              </div>
             </div>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-white mb-1">
-            Fint
-          </h1>
-          <p className="text-sm text-zinc-400">Tu dinero, claro.</p>
-        </div>
-
-        {/* Formulario */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label className="text-xs font-medium text-zinc-400 mb-1.5 block uppercase tracking-wider">
-              Email
-            </label>
-            <input
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="tu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-zinc-600 outline-none transition-all duration-200 focus:border-emerald-500/50 focus:bg-white/[0.07] focus:ring-1 focus:ring-emerald-500/20"
-            />
+            
+            <h1 
+              className="text-4xl font-bold tracking-tight text-white mb-2 opacity-0 animate-fade-in-up delay-300"
+            >
+              Fint
+            </h1>
+            <p 
+              className="text-sm text-zinc-500 opacity-0 animate-fade-in-up delay-300"
+            >
+              Tu dinero, claro.
+            </p>
           </div>
 
-          <div>
-            <label className="text-xs font-medium text-zinc-400 mb-1.5 block uppercase tracking-wider">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              required
-              autoComplete="current-password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-zinc-600 outline-none transition-all duration-200 focus:border-emerald-500/50 focus:bg-white/[0.07] focus:ring-1 focus:ring-emerald-500/20"
-            />
-          </div>
-
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
-              <p className="text-red-400 text-sm">{error}</p>
+          {/* Formulario */}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <div className="opacity-0 animate-fade-in-up delay-300">
+              <label className="text-[11px] font-semibold text-zinc-500 mb-2 block uppercase tracking-widest">
+                Email
+              </label>
+              <input
+                type="email"
+                required
+                autoComplete="email"
+                placeholder="tu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-black/30 border border-white/[0.08] rounded-xl px-4 py-3.5 text-white placeholder:text-zinc-600 outline-none transition-all duration-300 focus:border-emerald-500/40 focus:ring-[3px] focus:ring-emerald-500/10 focus:bg-black/40"
+              />
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-black font-bold rounded-xl py-3.5 mt-2 transition-all duration-200 disabled:opacity-50 disabled:active:scale-100 shadow-lg shadow-emerald-500/20"
-          >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                Entrando...
-              </span>
-            ) : (
-              "Entrar"
+            <div className="opacity-0 animate-fade-in-up delay-400">
+              <label className="text-[11px] font-semibold text-zinc-500 mb-2 block uppercase tracking-widest">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                required
+                autoComplete="current-password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-black/30 border border-white/[0.08] rounded-xl px-4 py-3.5 text-white placeholder:text-zinc-600 outline-none transition-all duration-300 focus:border-emerald-500/40 focus:ring-[3px] focus:ring-emerald-500/10 focus:bg-black/40"
+              />
+            </div>
+
+            {error && (
+              <div className="bg-red-500/8 border border-red-500/15 rounded-xl px-4 py-3 opacity-0 animate-fade-in-up delay-400">
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
             )}
-          </button>
-        </form>
 
-        <p className="text-zinc-500 text-sm mt-8 text-center">
-          ¿No tienes cuenta?{" "}
-          <Link
-            href="/registro"
-            className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
-          >
-            Regístrate
-          </Link>
-        </p>
+            <div className="opacity-0 animate-fade-in-up delay-400 pt-1">
+              <button
+                type="submit"
+                disabled={loading}
+                className="group relative w-full overflow-hidden rounded-xl py-4 font-bold text-black transition-all duration-300 hover:shadow-[0_0_40px_rgba(16,185,129,0.35)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:hover:scale-100 disabled:hover:shadow-none"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-400 bg-[length:200%_auto] transition-all duration-500 group-hover:bg-[length:300%_auto]" />
+                <span className="relative flex items-center justify-center gap-2 text-base">
+                  {loading ? (
+                    <>
+                      <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                      Entrando...
+                    </>
+                  ) : (
+                    <>
+                      Entrar
+                      <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                    </>
+                  )}
+                </span>
+              </button>
+            </div>
+          </form>
+
+          <p className="text-zinc-600 text-sm mt-8 text-center opacity-0 animate-fade-in-up delay-400">
+            ¿No tienes cuenta?{" "}
+            <Link
+              href="/registro"
+              className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
+            >
+              Regístrate
+            </Link>
+          </p>
+        </div>
       </div>
     </main>
   );
