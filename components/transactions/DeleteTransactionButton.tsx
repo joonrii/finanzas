@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { TransactionType } from "@/types";
+import { toast } from "@/lib/toast";
 
 export function DeleteTransactionButton({
   id,
@@ -26,7 +27,6 @@ export function DeleteTransactionButton({
   async function handleDelete() {
     setLoading(true);
 
-    // Revertir el efecto original en el saldo antes de borrar
     const revertOrigin =
       type === "expense" || type === "transfer" || type === "investment"
         ? amount
@@ -41,6 +41,7 @@ export function DeleteTransactionButton({
 
     setLoading(false);
     router.refresh();
+    toast("Movimiento eliminado");
   }
 
   async function adjustBalance(accId: string, delta: number) {
@@ -82,7 +83,7 @@ export function DeleteTransactionButton({
       className="text-muted text-xs shrink-0 ml-3"
       aria-label="Borrar movimiento"
     >
-      ✕
+      🗑
     </button>
   );
 }
