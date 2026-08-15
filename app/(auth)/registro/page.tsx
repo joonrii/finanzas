@@ -51,10 +51,7 @@ export default function RegistroPage() {
               Te hemos enviado un enlace de confirmación a{" "}
               <span className="text-emerald-400 font-medium">{email}</span>
             </p>
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
-            >
+            <Link href="/login" className="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">
               Volver al login
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -72,10 +69,7 @@ export default function RegistroPage() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-lime-500/10 rounded-full blur-[90px] animate-float" style={{ animationDelay: '5s' }} />
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
 
-      <div 
-        className="relative z-10 w-full max-w-[420px] opacity-0 animate-fade-in-up"
-        style={{ animationDelay: '0.1s' }}
-      >
+      <div className="relative z-10 w-full max-w-[420px] opacity-0 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
         <div className="backdrop-blur-2xl bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 shadow-2xl shadow-black/50">
           
           <div className="flex flex-col items-center mb-10">
@@ -127,7 +121,7 @@ export default function RegistroPage() {
             </div>
 
             {error && (
-              <div className="bg-red-500/8 border border-red-500/15 rounded-xl px-4 py-3 opacity-0 animate-fade-in-up delay-400">
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 opacity-0 animate-fade-in-up delay-400">
                 <p className="text-red-400 text-sm">{error}</p>
               </div>
             )}
@@ -158,10 +152,7 @@ export default function RegistroPage() {
 
           <p className="text-zinc-600 text-sm mt-8 text-center opacity-0 animate-fade-in-up delay-400">
             ¿Ya tienes cuenta?{" "}
-            <Link
-              href="/login"
-              className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
-            >
+            <Link href="/login" className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">
               Entra
             </Link>
           </p>
