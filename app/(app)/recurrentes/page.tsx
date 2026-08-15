@@ -49,7 +49,11 @@ export default async function RecurrentesPage() {
 
       <div className="space-y-3">
         {recurrings?.map((r: any) => {
-          const color = colorForLabel(r.categories?.name ?? "Otro");
+          // Supabase devuelve array u objeto dependiendo de la relación
+          const account = Array.isArray(r.accounts) ? r.accounts[0] : r.accounts;
+          const category = Array.isArray(r.categories) ? r.categories[0] : r.categories;
+          
+          const color = colorForLabel(category?.name ?? "Otro");
           const freqLabel =
             r.frequency === "daily"
               ? "Cada día"
@@ -71,14 +75,14 @@ export default async function RecurrentesPage() {
                   <div
                     className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${color.bg} ${color.text}`}
                   >
-                    {r.categories?.icon ?? "📦"}
+                    {category?.icon ?? "📦"}
                   </div>
                   <div>
                     <p className="text-white font-medium text-sm">
                       {r.description || "Sin descripción"}
                     </p>
                     <p className="text-muted text-xs mt-0.5">
-                      {r.accounts?.name} · {freqLabel}
+                      {account?.name} · {freqLabel}
                     </p>
                   </div>
                 </div>
