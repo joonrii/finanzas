@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { createClient } from "@/lib/supabase/client";
+import { suggestCategory, learnFromMerchant } from "@/lib/categorizer";
 import type { Account, Category, TransactionType } from "@/types";
 
 const TYPES: { value: TransactionType; label: string }[] = [
@@ -36,9 +37,24 @@ export function NewTransactionForm({
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [suggestionNote, setSuggestionNote] = useState<string | null>(null);
 
   const needsCategory = type === "expense" || type === "income";
   const needsDestination = type === "transfer" || type === "investment";
+
+  async function handleDescriptionBlur() {
+    if (!description.trim() || categoryId) return;
+    const suggestion = await suggestCategory(supabase, description, categories);
+    if (suggestion.categoryId) {
+      setCategoryId(suggestion.categoryId);
+      if (suggestion.accountId) setAccountId(suggestion.accountId);
+      setSuggestionNote(
+        suggestion.source === "rule"
+          ? "Sugerido a partir de movimientos anteriores"
+          : "Sugerido automáticamente"
+      );
+    }
+  }
 
   const visibleCategories = useMemo(
     () =>
@@ -82,6 +98,7 @@ export function NewTransactionForm({
       category_id: needsCategory ? categoryId : null,
       amount: parsedAmount,
       description: description || null,
+      merchant: description || null,
       occurred_on: date,
       source: "manual",
     });
@@ -103,6 +120,16 @@ export function NewTransactionForm({
 
     if (needsDestination) {
       await applyBalanceChange(supabase, destinationAccountId, parsedAmount);
+    }
+
+    if (needsCategory && categoryId && description.trim()) {
+      await learnFromMerchant(
+        supabase,
+        user.id,
+        description,
+        categoryId,
+        accountId
+      );
     }
 
     setLoading(false);
@@ -144,6 +171,26 @@ export function NewTransactionForm({
         ))}
       </div>
 
+      <div>
+        <label className="text-sm text-muted mb-1 block">
+          Descripción / comercio
+        </label>
+        <input
+          type="text"
+          value={description}
+          onChange={(e) => {
+            setDescription(e.target.value);
+            setSuggestionNote(null);
+          }}
+          onBlur={handleDescriptionBlur}
+          placeholder="Ej. Mercadona, cena con amigos…"
+          className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-base text-white outline-none focus:border-positive"
+        />
+        {suggestionNote && (
+          <p className="text-positive text-xs mt-1">✨ {suggestionNote}</p>
+        )}
+      </div>
+
       {needsCategory && (
         <div>
           <p className="text-sm text-muted mb-2">Categoría</p>
@@ -152,7 +199,10 @@ export function NewTransactionForm({
               <button
                 type="button"
                 key={c.id}
-                onClick={() => setCategoryId(c.id)}
+                onClick={() => {
+                  setCategoryId(c.id);
+                  setSuggestionNote(null);
+                }}
                 className={clsx(
                   "flex flex-col items-center gap-1 rounded-xl py-3 border text-[11px]",
                   categoryId === c.id
@@ -210,19 +260,6 @@ export function NewTransactionForm({
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-base text-white outline-none focus:border-positive"
-        />
-      </div>
-
-      <div>
-        <label className="text-sm text-muted mb-1 block">
-          Descripción (opcional)
-        </label>
-        <input
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Ej. Cena con amigos"
           className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-base text-white outline-none focus:border-positive"
         />
       </div>

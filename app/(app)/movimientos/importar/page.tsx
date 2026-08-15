@@ -7,6 +7,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { guessCategoryName } from "@/lib/importers/categorize";
 import { buildDedupeHash } from "@/lib/importers/dedupe";
+import { learnFromMerchant } from "@/lib/categorizer";
 import type { Account, Category } from "@/types";
 
 type Step = "cargando" | "subir" | "mapear" | "revisar";
@@ -127,6 +128,12 @@ export default function ImportarPage() {
       .select("dedupe_hash");
     const existingHashes = new Set((existing ?? []).map((e) => e.dedupe_hash));
 
+    // Reglas aprendidas del usuario: tienen prioridad sobre las palabras clave genéricas
+    const { data: rules } = await supabase
+      .from("merchant_rules")
+      .select("merchant_pattern, category_id")
+      .order("match_count", { ascending: false });
+
     const withDuplicates: ParsedRow[] = parsed.map((r) => {
       const hash = buildDedupeHash({
         accountId,
@@ -135,10 +142,19 @@ export default function ImportarPage() {
         description: r.description,
       });
       const isDuplicate = existingHashes.has(hash);
-      const guessedName = guessCategoryName(r.description);
-      const guessedCategory = guessedName
-        ? categories.find((c) => c.name === guessedName)?.id ?? null
-        : null;
+
+      const normalizedDesc = r.description.toUpperCase();
+      const matchingRule = (rules ?? []).find((rule) =>
+        normalizedDesc.includes(rule.merchant_pattern)
+      );
+
+      let guessedCategory: string | null = matchingRule?.category_id ?? null;
+      if (!guessedCategory) {
+        const guessedName = guessCategoryName(r.description);
+        guessedCategory = guessedName
+          ? categories.find((c) => c.name === guessedName)?.id ?? null
+          : null;
+      }
 
       return {
         ...r,
@@ -251,6 +267,16 @@ export default function ImportarPage() {
           .from("imported_transactions")
           .update({ resulting_transaction_id: transaction.id })
           .eq("id", importedRow.id);
+      }
+
+      if (row.categoryId) {
+        await learnFromMerchant(
+          supabase,
+          user.id,
+          row.description,
+          row.categoryId,
+          accountId
+        );
       }
 
       balanceDelta += type === "income" ? absoluteAmount : -absoluteAmount;
