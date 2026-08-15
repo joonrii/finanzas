@@ -1,3 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    -webkit-tap-highlight-color: transparent;
+    background:
+      radial-gradient(ellipse 600px 400px at 15% -5%, rgba(62, 207, 142, 0.08), transparent),
+      radial-gradient(ellipse 500px 350px at 100% 15%, rgba(56, 130, 246, 0.06), transparent),
+      #0B0D10;
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .money {
+    font-variant-numeric: tabular-nums;
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #16191d inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ===== ANIMACIONES LOGIN ===== */
 @keyframes float {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(30px, -50px) scale(1.1); }
@@ -13,11 +51,6 @@
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(30px) scale(0.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
 }
 
 .animate-float {
