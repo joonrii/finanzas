@@ -2,7 +2,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteTransactionButton } from "@/components/transactions/DeleteTransactionButton";
 import { Pencil } from "lucide-react";
-import Link from "next/link";
 import { colorForLabel } from "@/lib/colors";
 
 export default async function MovimientosPage() {
