@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { NewTransactionForm } from "@/components/transactions/NewTransactionForm";
+import NewTransactionForm from "@/components/transactions/NewTransactionForm";
 import { ArrowLeft, Wallet } from "lucide-react";
 
 export default async function NuevoMovimientoPage() {
