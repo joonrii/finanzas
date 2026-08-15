@@ -15,19 +15,21 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur border-t border-border safe-bottom z-40">
-      <div className="max-w-md mx-auto flex items-center justify-between px-2 relative">
+    <nav className="fixed inset-x-0 bottom-0 bg-surface/90 backdrop-blur border-t border-border safe-bottom z-40">
+      <div className="max-w-md mx-auto grid grid-cols-5 items-end">
         {items.slice(0, 2).map((item) => (
           <NavLink key={item.href} item={item} active={pathname === item.href} />
         ))}
 
-        <Link
-          href="/movimientos/nuevo"
-          aria-label="Añadir movimiento"
-          className="flex items-center justify-center w-14 h-14 rounded-full bg-positive text-base text-2xl font-semibold -mt-6 shadow-lg shadow-positive/20 shrink-0"
-        >
-          +
-        </Link>
+        <div className="flex justify-center">
+          <Link
+            href="/movimientos/nuevo"
+            aria-label="Añadir movimiento"
+            className="flex items-center justify-center w-14 h-14 rounded-full bg-positive text-base text-2xl font-semibold -mt-6 shadow-lg shadow-positive/20 shrink-0"
+          >
+            +
+          </Link>
+        </div>
 
         {items.slice(2).map((item) => (
           <NavLink key={item.href} item={item} active={pathname === item.href} />
@@ -48,7 +50,7 @@ function NavLink({
     <Link
       href={item.href}
       className={clsx(
-        "flex flex-col items-center gap-0.5 py-3 px-4 text-xs",
+        "flex flex-col items-center gap-0.5 py-3 text-[10px] leading-tight whitespace-nowrap",
         active ? "text-positive" : "text-muted"
       )}
     >
