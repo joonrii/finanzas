@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BalanceAdjustmentForm } from "@/components/accounts/BalanceAdjustmentForm";
 import { InvestmentSnapshotForm } from "@/components/accounts/InvestmentSnapshotForm";
+import { EditContributedButton } from "@/components/accounts/EditContributedButton";
 
 export default async function CuentaDetallePage({
   params,
@@ -54,7 +55,13 @@ export default async function CuentaDetallePage({
 
           <div className="flex gap-4 mt-4 pt-4 border-t border-border">
             <div className="flex-1">
-              <p className="text-muted text-xs mb-0.5">Total aportado</p>
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <p className="text-muted text-xs">Total aportado</p>
+                <EditContributedButton
+                  accountId={account.id}
+                  currentTotal={totalContributed}
+                />
+              </div>
               <p className="money text-sm font-medium">
                 {totalContributed.toFixed(2)} €
               </p>
