@@ -5,13 +5,17 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Finanzas",
+  title: "Fint",
   description: "Tu patrimonio, tus gastos, tu evolución.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon-32x32.png",
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Finanzas",
+    title: "Fint",
   },
 };
 
