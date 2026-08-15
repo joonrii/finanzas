@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { NetWorthChart } from "@/components/charts/NetWorthChart";
 import { CategoryBreakdown } from "@/components/charts/CategoryBreakdown";
-import { Wallet, TrendingDown } from "lucide-react";
+import { Wallet, TrendingDown, CreditCard, TrendingUp } from "lucide-react";
 import Link from "next/link";
 
 export default async function ResumenPage() {
@@ -87,21 +87,40 @@ export default async function ResumenPage() {
         />
       ) : (
         <>
-          <div className="relative overflow-hidden bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+          {/* === PATRIMONIO TOTAL — ESTILO 3D === */}
+          <div
+            className="relative overflow-hidden rounded-2xl p-5 border border-white/[0.06]"
+            style={{
+              background: "linear-gradient(180deg, #0f172a 0%, #020617 100%)",
+              boxShadow: "0 8px 32px rgba(16,185,129,0.12), inset 0 1px 0 rgba(255,255,255,0.04)",
+            }}
+          >
+            {/* Línea verde inferior */}
+            <div className="absolute bottom-0 left-[20%] right-[20%] h-[1px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent" />
+
             <p className="text-zinc-500 text-sm mb-1">Patrimonio total</p>
-            <p className="money text-4xl font-bold text-white">
+            <p
+              className="money text-4xl font-bold text-white"
+              style={{ textShadow: "0 0 20px rgba(16,185,129,0.3)" }}
+            >
               {netWorth.toFixed(2)} €
             </p>
+
             <div className="flex gap-4 mt-4 pt-4 border-t border-white/[0.06]">
               <div className="flex-1">
-                <p className="text-zinc-500 text-xs mb-0.5">💳 En bancos</p>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <CreditCard className="w-3 h-3 text-emerald-400" />
+                  <p className="text-zinc-500 text-xs">En bancos</p>
+                </div>
                 <p className="money text-sm font-medium text-white">
                   {bankTotal.toFixed(2)} €
                 </p>
               </div>
               <div className="flex-1">
-                <p className="text-zinc-500 text-xs mb-0.5">📈 Inversiones</p>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <TrendingUp className="w-3 h-3 text-emerald-400" />
+                  <p className="text-zinc-500 text-xs">Inversiones</p>
+                </div>
                 <p className="money text-sm font-medium text-white">
                   {investmentTotal.toFixed(2)} €
                 </p>
