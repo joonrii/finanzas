@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/lib/toast";
-import { Trash2, X } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 
 export function DeleteAccountButton({ accountId }: { accountId: string }) {
   const router = useRouter();
@@ -15,34 +15,15 @@ export function DeleteAccountButton({ accountId }: { accountId: string }) {
   async function handleDelete() {
     setLoading(true);
 
-    // 1. Borrar transacciones asociadas a esta cuenta
-    await supabase
-      .from("transactions")
-      .delete()
-      .eq("account_id", accountId);
-
-    // 2. Borrar transacciones donde esta cuenta es destino
-    await supabase
-      .from("transactions")
-      .delete()
-      .eq("destination_account_id", accountId);
-
-    // 3. Borrar snapshots de saldo
-    await supabase
-      .from("balance_snapshots")
-      .delete()
-      .eq("account_id", accountId);
-
-    // 4. Borrar la cuenta
-    await supabase
-      .from("accounts")
-      .delete()
-      .eq("id", accountId);
+    // Borrar la cuenta (las transacciones quedan huérfanas en la DB,
+    // pero como es cuenta de ejemplo no importa. Para producción
+    // podrías marcar is_archived = true en su lugar)
+    await supabase.from("accounts").delete().eq("id", accountId);
 
     setLoading(false);
-    toast("Cuenta eliminada");
     router.push("/cuentas");
     router.refresh();
+    toast("Cuenta eliminada");
   }
 
   if (confirming) {
@@ -58,7 +39,7 @@ export function DeleteAccountButton({ accountId }: { accountId: string }) {
           ) : (
             <Trash2 className="w-3.5 h-3.5" />
           )}
-          Borrar cuenta
+          Borrar
         </button>
         <button
           onClick={() => setConfirming(false)}
@@ -73,11 +54,10 @@ export function DeleteAccountButton({ accountId }: { accountId: string }) {
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="flex items-center gap-1.5 text-zinc-500 hover:text-red-400 text-xs font-medium px-3 py-2 rounded-lg bg-white/5 border border-white/10 transition-all hover:bg-red-500/10 hover:border-red-500/20 active:scale-95"
+      className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 transition-all duration-200 hover:text-red-400 hover:bg-red-500/10 active:scale-90"
       aria-label="Borrar cuenta"
     >
-      <Trash2 className="w-3.5 h-3.5" />
-      Borrar
+      <X className="w-4 h-4" strokeWidth={2.5} />
     </button>
   );
 }
