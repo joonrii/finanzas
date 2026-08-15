@@ -31,6 +31,8 @@ export function NetWorthChart({ series }: { series: Point[] }) {
     cutoff.setDate(cutoff.getDate() - range.days);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
     const inRange = series.filter((p) => p.date >= cutoffStr);
+    // Si el rango no tiene suficientes puntos, incluye al menos el último
+    // punto anterior para que la línea no empiece de la nada.
     if (inRange.length === series.length) return series;
     const firstIndex = series.findIndex((p) => p.date >= cutoffStr);
     return firstIndex > 0 ? series.slice(firstIndex - 1) : inRange;
@@ -38,29 +40,29 @@ export function NetWorthChart({ series }: { series: Point[] }) {
 
   if (series.length < 2) {
     return (
-      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
-        <p className="text-sm font-medium text-white mb-1">Evolución del patrimonio</p>
-        <p className="text-zinc-500 text-sm">
-          Registra movimientos durante unos días para ver la evolución.
+      <div className="bg-surface border border-border rounded-2xl p-5">
+        <p className="text-sm font-medium mb-1">Evolución del patrimonio</p>
+        <p className="text-muted text-sm">
+          Registra movimientos durante unos días para ver aquí la evolución.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+    <div className="bg-surface border border-border rounded-2xl p-5">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm font-medium text-white">Evolución del patrimonio</p>
+        <p className="text-sm font-medium">Evolución del patrimonio</p>
         <div className="flex gap-1">
           {RANGES.map((r) => (
             <button
               key={r.label}
               onClick={() => setRange(r)}
               className={clsx(
-                "text-[11px] px-2 py-1 rounded-lg transition-all",
+                "text-[11px] px-2 py-1 rounded-lg",
                 range.label === r.label
-                  ? "bg-emerald-500/10 text-emerald-400"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  ? "bg-positive/10 text-positive"
+                  : "text-muted"
               )}
             >
               {r.label}
@@ -74,13 +76,13 @@ export function NetWorthChart({ series }: { series: Point[] }) {
           <AreaChart data={filtered}>
             <defs>
               <linearGradient id="netWorthFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                <stop offset="0%" stopColor="#3ECF8E" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="#3ECF8E" stopOpacity={0} />
               </linearGradient>
             </defs>
             <XAxis
               dataKey="date"
-              tick={{ fill: "#52525b", fontSize: 10 }}
+              tick={{ fill: "#8B939C", fontSize: 10 }}
               tickFormatter={(d: string) =>
                 new Date(d + "T00:00:00").toLocaleDateString("es-ES", {
                   day: "2-digit",
@@ -91,17 +93,13 @@ export function NetWorthChart({ series }: { series: Point[] }) {
               tickLine={false}
               minTickGap={30}
             />
-            <YAxis
-              hide
-              domain={["dataMin - 50", "dataMax + 50"]}
-            />
+            <YAxis hide domain={["dataMin - 50", "dataMax + 50"]} />
             <Tooltip
               contentStyle={{
-                background: "#0a0a0a",
-                border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: 12,
+                background: "#1D2126",
+                border: "1px solid #262B31",
+                borderRadius: 8,
                 fontSize: 12,
-                color: "#fff",
               }}
               labelFormatter={(d: string) =>
                 new Date(d + "T00:00:00").toLocaleDateString("es-ES")
@@ -111,8 +109,8 @@ export function NetWorthChart({ series }: { series: Point[] }) {
             <Area
               type="monotone"
               dataKey="value"
-              stroke="#10b981"
-              strokeWidth={2}
+              stroke="#3ECF8E"
+              strokeWidth={2.5}
               fill="url(#netWorthFill)"
               dot={false}
             />

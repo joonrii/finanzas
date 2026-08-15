@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { TransactionType } from "@/types";
-import { toast } from "@/lib/toast";
-import { X, Trash2 } from "lucide-react";
 
 export function DeleteTransactionButton({
   id,
@@ -28,6 +26,7 @@ export function DeleteTransactionButton({
   async function handleDelete() {
     setLoading(true);
 
+    // Revertir el efecto original en el saldo antes de borrar
     const revertOrigin =
       type === "expense" || type === "transfer" || type === "investment"
         ? amount
@@ -42,7 +41,6 @@ export function DeleteTransactionButton({
 
     setLoading(false);
     router.refresh();
-    toast("Movimiento eliminado");
   }
 
   async function adjustBalance(accId: string, delta: number) {
@@ -60,22 +58,17 @@ export function DeleteTransactionButton({
 
   if (confirming) {
     return (
-      <div className="flex items-center gap-2 animate-fade-in-up">
+      <div className="flex gap-2 items-center">
         <button
           onClick={handleDelete}
           disabled={loading}
-          className="flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:bg-red-500/20 active:scale-95"
+          className="text-negative text-xs font-medium"
         >
-          {loading ? (
-            <span className="w-3 h-3 border border-red-400/30 border-t-red-400 rounded-full animate-spin" />
-          ) : (
-            <Trash2 className="w-3.5 h-3.5" />
-          )}
-          Borrar
+          {loading ? "…" : "Confirmar"}
         </button>
         <button
           onClick={() => setConfirming(false)}
-          className="text-zinc-500 text-xs font-medium px-2 py-1.5 transition-colors hover:text-zinc-300"
+          className="text-muted text-xs"
         >
           Cancelar
         </button>
@@ -86,10 +79,10 @@ export function DeleteTransactionButton({
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 transition-all duration-200 hover:text-red-400 hover:bg-red-500/10 active:scale-90"
+      className="text-muted text-xs shrink-0 ml-3"
       aria-label="Borrar movimiento"
     >
-      <X className="w-4 h-4" strokeWidth={2.5} />
+      ✕
     </button>
   );
 }
