@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { TransactionType } from "@/types";
 import { toast } from "@/lib/toast";
+import { X, Trash2 } from "lucide-react";
 
 export function DeleteTransactionButton({
   id,
@@ -59,17 +60,22 @@ export function DeleteTransactionButton({
 
   if (confirming) {
     return (
-      <div className="flex gap-2 items-center">
+      <div className="flex items-center gap-2 animate-fade-in-up">
         <button
           onClick={handleDelete}
           disabled={loading}
-          className="text-negative text-xs font-medium"
+          className="flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:bg-red-500/20 active:scale-95"
         >
-          {loading ? "…" : "Confirmar"}
+          {loading ? (
+            <span className="w-3 h-3 border border-red-400/30 border-t-red-400 rounded-full animate-spin" />
+          ) : (
+            <Trash2 className="w-3.5 h-3.5" />
+          )}
+          Borrar
         </button>
         <button
           onClick={() => setConfirming(false)}
-          className="text-muted text-xs"
+          className="text-zinc-500 text-xs font-medium px-2 py-1.5 transition-colors hover:text-zinc-300"
         >
           Cancelar
         </button>
@@ -80,10 +86,10 @@ export function DeleteTransactionButton({
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="text-muted text-xs shrink-0 ml-3"
+      className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 transition-all duration-200 hover:text-red-400 hover:bg-red-500/10 active:scale-90"
       aria-label="Borrar movimiento"
     >
-      🗑
+      <X className="w-4 h-4" strokeWidth={2.5} />
     </button>
   );
 }
