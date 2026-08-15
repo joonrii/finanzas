@@ -1,182 +1,176 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import clsx from "clsx";
 import { createClient } from "@/lib/supabase/client";
-import { suggestCategory, learnFromMerchant } from "@/lib/categorizer";
 import { colorForLabel } from "@/lib/colors";
-import { toast } from "@/lib/toast";
-import type { Account, Category, TransactionType } from "@/types";
+import { suggestCategory, learnFromMerchant } from "@/lib/categorizer";
+import TagInput from "@/components/tags/TagInput";
 
-const TYPES: { value: TransactionType; label: string }[] = [
-  { value: "expense", label: "Gasto" },
-  { value: "income", label: "Ingreso" },
-  { value: "transfer", label: "Transferencia" },
-  { value: "investment", label: "Inversión" },
+const TYPES = [
+  { value: "expense", label: "Gasto", color: "text-negative" },
+  { value: "income", label: "Ingreso", color: "text-positive" },
+  { value: "transfer", label: "Transferencia", color: "text-sky-400" },
+  { value: "investment", label: "Inversión", color: "text-amber-400" },
 ];
 
-export function NewTransactionForm({
+type Account = { id: string; name: string };
+type Category = { id: string; name: string; icon: string; kind: string };
+
+export default function NewTransactionForm({
   accounts,
   categories,
 }: {
-  accounts: Pick<Account, "id" | "name" | "type" | "provider">[];
+  accounts: Account[];
   categories: Category[];
 }) {
   const router = useRouter();
   const supabase = createClient();
 
-  const [type, setType] = useState<TransactionType>("expense");
+  const [type, setType] = useState("expense");
   const [amount, setAmount] = useState("");
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
-  const [destinationAccountId, setDestinationAccountId] = useState(
-    accounts[1]?.id ?? ""
-  );
-  const [date, setDate] = useState(
-    () => new Date().toISOString().slice(0, 10)
-  );
   const [description, setDescription] = useState("");
+  const [accountId, setAccountId] = useState("");
+  const [destinationAccountId, setDestinationAccountId] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [suggestionNote, setSuggestionNote] = useState<string | null>(null);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
-  const needsCategory = type === "expense" || type === "income";
-  const needsDestination = type === "transfer" || type === "investment";
+  const needsCategory = type === "expense" || type === "income" || type === "investment";
+  const needsDestination = type === "transfer";
+
+  const visibleCategories = categories.filter((c) =>
+    type === "income" ? c.kind === "income" : c.kind === "expense"
+  );
 
   async function handleDescriptionBlur() {
-    if (!description.trim() || categoryId) return;
+    if (!description.trim() || !needsCategory) return;
     const suggestion = await suggestCategory(supabase, description, categories);
-    if (suggestion.categoryId) {
+    if (suggestion.categoryId && suggestion.source) {
       setCategoryId(suggestion.categoryId);
-      if (suggestion.accountId) setAccountId(suggestion.accountId);
+      if (suggestion.accountId && !accountId) {
+        setAccountId(suggestion.accountId);
+      }
       setSuggestionNote(
         suggestion.source === "rule"
-          ? "Sugerido a partir de movimientos anteriores"
-          : "Sugerido automáticamente"
+          ? "Categoría sugerida por una regla tuya"
+          : "Categoría sugerida automáticamente"
       );
     }
   }
-
-  const visibleCategories = useMemo(
-    () =>
-      categories.filter((c) =>
-        type === "income" ? c.kind === "income" : c.kind === "expense"
-      ),
-    [categories, type]
-  );
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
-    const parsedAmount = parseFloat(amount);
-    if (!parsedAmount || parsedAmount <= 0) {
+    const parsedAmount = parseFloat(amount.replace(",", "."));
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
       setError("Introduce un importe válido.");
       return;
     }
-    if (needsDestination && destinationAccountId === accountId) {
-      setError("La cuenta de destino debe ser distinta de la de origen.");
+    if (!accountId) {
+      setError("Selecciona una cuenta.");
+      return;
+    }
+    if (needsDestination && !destinationAccountId) {
+      setError("Selecciona una cuenta de destino.");
       return;
     }
 
-    setLoading(true);
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
+    setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      setError("Sesión no válida, vuelve a entrar.");
-      setLoading(false);
+      setError("Sesión no válida.");
+      setSaving(false);
       return;
     }
 
-    const { error: insertError } = await supabase.from("transactions").insert({
+    const payload = {
       user_id: user.id,
       account_id: accountId,
       destination_account_id: needsDestination ? destinationAccountId : null,
+      category_id: needsCategory ? categoryId || null : null,
       type,
-      category_id: needsCategory ? categoryId : null,
       amount: parsedAmount,
       description: description || null,
-      merchant: description || null,
+      merchant: description ? description.toUpperCase().slice(0, 40) : null,
       occurred_on: date,
-      source: "manual",
-    });
+      source: "manual" as const,
+    };
+
+    const { data, error: insertError } = await supabase
+      .from("transactions")
+      .insert(payload)
+      .select();
 
     if (insertError) {
       setError(insertError.message);
-      setLoading(false);
+      setSaving(false);
       return;
     }
 
-    await applyBalanceChange(
-      supabase,
-      accountId,
-      type === "expense" || type === "transfer" || type === "investment"
-        ? -parsedAmount
-        : parsedAmount
-    );
+    const newTransactionId = data?.[0]?.id;
 
-    if (needsDestination) {
-      await applyBalanceChange(supabase, destinationAccountId, parsedAmount);
+    // Guardar tags si hay
+    if (selectedTagIds.length > 0 && newTransactionId) {
+      const tagRelations = selectedTagIds.map((tagId) => ({
+        transaction_id: newTransactionId,
+        tag_id: tagId,
+      }));
+      await supabase.from("transaction_tags").insert(tagRelations);
     }
 
-    if (needsCategory && categoryId && description.trim()) {
-      await learnFromMerchant(
-        supabase,
-        user.id,
-        description,
-        categoryId,
-        accountId
-      );
+    // Aprender de esta categorización
+    if (needsCategory && categoryId && description) {
+      await learnFromMerchant(supabase, user.id, description, categoryId, accountId);
     }
 
-    setLoading(false);
+    setSaving(false);
     router.push("/movimientos");
     router.refresh();
-    toast("Movimiento guardado");
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Monto */}
       <div>
         <input
           type="number"
-          inputMode="decimal"
           step="0.01"
-          required
-          autoFocus
-          placeholder="0,00"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
+          placeholder="0,00"
           className="w-full bg-surface border border-border rounded-2xl px-4 py-5 text-4xl font-semibold text-white text-center outline-none focus:border-positive money"
         />
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      {/* Tipo */}
+      <div className="grid grid-cols-2 gap-2">
         {TYPES.map((t) => (
           <button
-            type="button"
             key={t.value}
-            onClick={() => setType(t.value)}
-            className={clsx(
-              "rounded-xl py-2.5 text-xs font-medium border",
+            type="button"
+            onClick={() => {
+              setType(t.value);
+              setCategoryId("");
+            }}
+            className={`rounded-xl px-4 py-3 text-sm font-medium border transition ${
               type === t.value
-                ? "bg-positive/10 border-positive text-positive"
-                : "bg-surface border-border text-muted"
-            )}
+                ? "border-positive bg-positive/10 text-positive"
+                : "border-border bg-surface text-muted hover:border-muted"
+            }`}
           >
             {t.label}
           </button>
         ))}
       </div>
 
+      {/* Descripción */}
       <div>
-        <label className="text-sm text-muted mb-1 block">
-          Descripción / comercio
-        </label>
+        <label className="block text-sm text-muted mb-2">Descripción / comercio</label>
         <input
           type="text"
           value={description}
@@ -189,40 +183,34 @@ export function NewTransactionForm({
           className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-base text-white outline-none focus:border-positive"
         />
         {suggestionNote && (
-          <p className="text-positive text-xs mt-1">✨ {suggestionNote}</p>
+          <p className="text-xs text-positive mt-1.5 flex items-center gap-1">
+            ✨ {suggestionNote}
+          </p>
         )}
       </div>
 
+      {/* Categoría */}
       {needsCategory && (
         <div>
-          <p className="text-sm text-muted mb-2">Categoría</p>
-          <div className="grid grid-cols-4 gap-2">
+          <label className="block text-sm text-muted mb-2">Categoría</label>
+          <div className="grid grid-cols-2 gap-2">
             {visibleCategories.map((c) => {
               const color = colorForLabel(c.name);
               return (
                 <button
-                  type="button"
                   key={c.id}
-                  onClick={() => {
-                    setCategoryId(c.id);
-                    setSuggestionNote(null);
-                  }}
-                  className={clsx(
-                    "flex flex-col items-center gap-1 rounded-xl py-3 border text-[11px]",
+                  type="button"
+                  onClick={() => setCategoryId(c.id)}
+                  className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm border transition ${
                     categoryId === c.id
-                      ? "bg-positive/10 border-positive text-positive"
-                      : "bg-surface border-border text-muted"
-                  )}
+                      ? "border-positive bg-positive/10"
+                      : "border-border bg-surface hover:border-muted"
+                  }`}
                 >
-                  <span
-                    className={
-                      "w-7 h-7 rounded-full flex items-center justify-center text-sm " +
-                      color.bg
-                    }
-                  >
+                  <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm ${color.bg} ${color.text}`}>
                     {c.icon}
                   </span>
-                  {c.name}
+                  <span className="text-white">{c.name}</span>
                 </button>
               );
             })}
@@ -230,8 +218,9 @@ export function NewTransactionForm({
         </div>
       )}
 
+      {/* Cuenta origen */}
       <div>
-        <label className="text-sm text-muted mb-1 block">
+        <label className="block text-sm text-muted mb-2">
           {needsDestination ? "Cuenta de origen" : "Cuenta"}
         </label>
         <select
@@ -239,35 +228,35 @@ export function NewTransactionForm({
           onChange={(e) => setAccountId(e.target.value)}
           className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-base text-white outline-none focus:border-positive"
         >
+          <option value="">Selecciona...</option>
           {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
+            <option key={a.id} value={a.id}>{a.name}</option>
           ))}
         </select>
       </div>
 
+      {/* Cuenta destino */}
       {needsDestination && (
         <div>
-          <label className="text-sm text-muted mb-1 block">
-            Cuenta de destino
-          </label>
+          <label className="block text-sm text-muted mb-2">Cuenta de destino</label>
           <select
             value={destinationAccountId}
             onChange={(e) => setDestinationAccountId(e.target.value)}
             className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-base text-white outline-none focus:border-positive"
           >
-            {accounts.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
+            <option value="">Selecciona...</option>
+            {accounts
+              .filter((a) => a.id !== accountId)
+              .map((a) => (
+                <option key={a.id} value={a.id}>{a.name}</option>
+              ))}
           </select>
         </div>
       )}
 
+      {/* Fecha */}
       <div>
-        <label className="text-sm text-muted mb-1 block">Fecha</label>
+        <label className="block text-sm text-muted mb-2">Fecha</label>
         <input
           type="date"
           value={date}
@@ -276,36 +265,24 @@ export function NewTransactionForm({
         />
       </div>
 
-      {error && <p className="text-negative text-sm">{error}</p>}
+      {/* Tags - NUEVO */}
+      <TagInput onTagsChange={setSelectedTagIds} />
 
+      {/* Error */}
+      {error && (
+        <div className="rounded-xl bg-negative/10 border border-negative/30 px-4 py-3 text-sm text-negative">
+          {error}
+        </div>
+      )}
+
+      {/* Botón */}
       <button
         type="submit"
-        disabled={loading}
-        className="bg-positive text-base font-medium rounded-xl py-3 disabled:opacity-50"
+        disabled={saving}
+        className="w-full bg-positive text-base font-semibold text-black rounded-xl py-4 transition hover:brightness-110 disabled:opacity-50"
       >
-        {loading ? "Guardando…" : "Guardar movimiento"}
+        {saving ? "Guardando..." : "Guardar movimiento"}
       </button>
     </form>
   );
-}
-
-async function applyBalanceChange(
-  supabase: ReturnType<typeof createClient>,
-  accountId: string,
-  delta: number
-) {
-  const { data: account } = await supabase
-    .from("accounts")
-    .select("calculated_balance")
-    .eq("id", accountId)
-    .single();
-
-  if (!account) return;
-
-  await supabase
-    .from("accounts")
-    .update({
-      calculated_balance: Number(account.calculated_balance) + delta,
-    })
-    .eq("id", accountId);
 }
