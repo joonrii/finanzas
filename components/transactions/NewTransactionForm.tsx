@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { suggestCategory, learnFromMerchant } from "@/lib/categorizer";
 import { colorForLabel } from "@/lib/colors";
 import { toast } from "@/lib/toast";
+import TagInput from "@/components/tags/TagInput";
 import type { Account, Category, TransactionType } from "@/types";
 
 const TYPES: { value: TransactionType; label: string }[] = [
@@ -40,6 +41,7 @@ export function NewTransactionForm({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [suggestionNote, setSuggestionNote] = useState<string | null>(null);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
   const needsCategory = type === "expense" || type === "income";
   const needsDestination = type === "transfer" || type === "investment";
@@ -92,23 +94,36 @@ export function NewTransactionForm({
       return;
     }
 
-    const { error: insertError } = await supabase.from("transactions").insert({
-      user_id: user.id,
-      account_id: accountId,
-      destination_account_id: needsDestination ? destinationAccountId : null,
-      type,
-      category_id: needsCategory ? categoryId : null,
-      amount: parsedAmount,
-      description: description || null,
-      merchant: description || null,
-      occurred_on: date,
-      source: "manual",
-    });
+    const { data: inserted, error: insertError } = await supabase
+      .from("transactions")
+      .insert({
+        user_id: user.id,
+        account_id: accountId,
+        destination_account_id: needsDestination ? destinationAccountId : null,
+        type,
+        category_id: needsCategory ? categoryId : null,
+        amount: parsedAmount,
+        description: description || null,
+        merchant: description || null,
+        occurred_on: date,
+        source: "manual",
+      })
+      .select();
 
     if (insertError) {
       setError(insertError.message);
       setLoading(false);
       return;
+    }
+
+    // Guardar tags
+    if (inserted && inserted[0] && selectedTagIds.length > 0) {
+      await supabase.from("transaction_tags").insert(
+        selectedTagIds.map((tagId) => ({
+          transaction_id: inserted[0].id,
+          tag_id: tagId,
+        }))
+      );
     }
 
     await applyBalanceChange(
@@ -275,6 +290,8 @@ export function NewTransactionForm({
           className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-base text-white outline-none focus:border-positive"
         />
       </div>
+
+      <TagInput onTagsChange={setSelectedTagIds} />
 
       {error && <p className="text-negative text-sm">{error}</p>}
 
