@@ -6,6 +6,7 @@ import clsx from "clsx";
 import { createClient } from "@/lib/supabase/client";
 import { suggestCategory, learnFromMerchant } from "@/lib/categorizer";
 import { colorForLabel } from "@/lib/colors";
+import { toast } from "@/lib/toast";
 import type { Account, Category, TransactionType } from "@/types";
 
 const TYPES: { value: TransactionType; label: string }[] = [
@@ -110,7 +111,6 @@ export function NewTransactionForm({
       return;
     }
 
-    // Actualiza el saldo calculado de la(s) cuenta(s) implicadas
     await applyBalanceChange(
       supabase,
       accountId,
@@ -136,6 +136,7 @@ export function NewTransactionForm({
     setLoading(false);
     router.push("/movimientos");
     router.refresh();
+    toast("Movimiento guardado");
   }
 
   return (
