@@ -3,6 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { BalanceAdjustmentForm } from "@/components/accounts/BalanceAdjustmentForm";
 import { InvestmentSnapshotForm } from "@/components/accounts/InvestmentSnapshotForm";
 import { EditContributedButton } from "@/components/accounts/EditContributedButton";
+import { DeleteAccountButton } from "@/components/accounts/DeleteAccountButton";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default async function CuentaDetallePage({
   params,
@@ -44,34 +47,45 @@ export default async function CuentaDetallePage({
     const byMonth = groupContributionsByMonth(contributions ?? []);
 
     return (
-      <div className="flex flex-col gap-6">
-        <h1 className="text-xl font-medium">{account.name}</h1>
+      <div className="flex flex-col gap-5 animate-fade-in-up">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/cuentas"
+              className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-400 transition-all hover:text-white hover:bg-white/10 active:scale-95"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <h1 className="text-2xl font-bold text-white">{account.name}</h1>
+          </div>
+          <DeleteAccountButton accountId={account.id} />
+        </div>
 
-        <div className="bg-surface border border-border rounded-2xl p-5">
-          <p className="text-muted text-sm mb-1">Valor actual</p>
-          <p className="money text-3xl font-semibold">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+          <p className="text-zinc-500 text-sm mb-1">Valor actual</p>
+          <p className="money text-3xl font-bold text-white">
             {currentValue.toFixed(2)} €
           </p>
 
-          <div className="flex gap-4 mt-4 pt-4 border-t border-border">
+          <div className="flex gap-4 mt-4 pt-4 border-t border-white/[0.06]">
             <div className="flex-1">
               <div className="flex items-center gap-1.5 mb-0.5">
-                <p className="text-muted text-xs">Total aportado</p>
+                <p className="text-zinc-500 text-xs">Total aportado</p>
                 <EditContributedButton
                   accountId={account.id}
                   currentTotal={totalContributed}
                 />
               </div>
-              <p className="money text-sm font-medium">
+              <p className="money text-sm font-medium text-white">
                 {totalContributed.toFixed(2)} €
               </p>
             </div>
             <div className="flex-1">
-              <p className="text-muted text-xs mb-0.5">Rentabilidad</p>
+              <p className="text-zinc-500 text-xs mb-0.5">Rentabilidad</p>
               <p
                 className={
                   "money text-sm font-medium " +
-                  (returnAmount >= 0 ? "text-positive" : "text-negative")
+                  (returnAmount >= 0 ? "text-emerald-400" : "text-red-400")
                 }
               >
                 {returnAmount >= 0 ? "+" : ""}
@@ -82,8 +96,8 @@ export default async function CuentaDetallePage({
           </div>
         </div>
 
-        <div className="bg-surface border border-border rounded-2xl p-5">
-          <p className="text-sm font-medium mb-3">Actualizar valor de cartera</p>
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+          <p className="text-sm font-medium text-white mb-3">Actualizar valor de cartera</p>
           <InvestmentSnapshotForm
             accountId={account.id}
             calculatedBalance={calculatedBalance}
@@ -91,15 +105,15 @@ export default async function CuentaDetallePage({
         </div>
 
         {byMonth.length > 0 && (
-          <div className="bg-surface border border-border rounded-2xl p-5">
-            <p className="text-sm font-medium mb-3">Aportaciones por mes</p>
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+            <p className="text-sm font-medium text-white mb-3">Aportaciones por mes</p>
             <ul className="flex flex-col gap-2">
               {byMonth.map((m) => (
                 <li
                   key={m.month}
-                  className="flex justify-between text-sm text-muted"
+                  className="flex justify-between text-sm"
                 >
-                  <span className="capitalize">{m.label}</span>
+                  <span className="capitalize text-zinc-400">{m.label}</span>
                   <span className="money text-white">
                     {m.total.toFixed(2)} €
                   </span>
@@ -110,10 +124,10 @@ export default async function CuentaDetallePage({
         )}
 
         {(!contributions || contributions.length === 0) && (
-          <div className="bg-surface border border-border rounded-2xl p-5 text-center">
-            <p className="text-muted text-sm">
-              Registra tus aportaciones como movimientos de tipo "Inversión"
-              para ver aquí la rentabilidad real.
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 text-center">
+            <p className="text-zinc-500 text-sm">
+              Registra tus aportaciones como movimientos de tipo "Inversion"
+              para ver aqui la rentabilidad real.
             </p>
           </div>
         )}
@@ -130,21 +144,29 @@ export default async function CuentaDetallePage({
     .limit(5);
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-medium">{account.name}</h1>
+    <div className="flex flex-col gap-5 animate-fade-in-up">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/cuentas"
+            className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-400 transition-all hover:text-white hover:bg-white/10 active:scale-95"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <h1 className="text-2xl font-bold text-white">{account.name}</h1>
+        </div>
+        <DeleteAccountButton accountId={account.id} />
+      </div>
 
-      <div className="bg-surface border border-border rounded-2xl p-5">
-        <p className="text-muted text-sm mb-1">Saldo calculado</p>
-        <p className="money text-3xl font-semibold">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+        <p className="text-zinc-500 text-sm mb-1">Saldo calculado</p>
+        <p className="money text-3xl font-bold text-white">
           {calculatedBalance.toFixed(2)} €
-        </p>
-        <p className="text-muted text-xs mt-1">
-          Calculado a partir de tus movimientos registrados.
         </p>
       </div>
 
-      <div className="bg-surface border border-border rounded-2xl p-5">
-        <p className="text-sm font-medium mb-3">Cuadrar saldo</p>
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+        <p className="text-sm font-medium text-white mb-3">Ajustar saldo</p>
         <BalanceAdjustmentForm
           accountId={account.id}
           calculatedBalance={calculatedBalance}
@@ -152,15 +174,16 @@ export default async function CuentaDetallePage({
       </div>
 
       {snapshots && snapshots.length > 0 && (
-        <div className="bg-surface border border-border rounded-2xl p-5">
-          <p className="text-sm font-medium mb-3">Historial de saldo real</p>
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+          <p className="text-sm font-medium text-white mb-3">Historial de ajustes</p>
           <ul className="flex flex-col gap-2">
-            {snapshots.map((s, i) => (
-              <li key={i} className="flex justify-between text-sm text-muted">
-                <span>
-                  {new Date(s.snapshot_date + "T00:00:00").toLocaleDateString(
-                    "es-ES"
-                  )}
+            {snapshots.map((s) => (
+              <li
+                key={s.snapshot_date}
+                className="flex justify-between text-sm"
+              >
+                <span className="text-zinc-400">
+                  {new Date(s.snapshot_date).toLocaleDateString("es-ES")}
                 </span>
                 <span className="money text-white">
                   {Number(s.balance).toFixed(2)} €
@@ -175,22 +198,30 @@ export default async function CuentaDetallePage({
 }
 
 function groupContributionsByMonth(
-  contributions: { amount: number; occurred_on: string }[]
+  items: { amount: number; occurred_on: string }[]
 ) {
-  const map = new Map<string, number>();
-  for (const c of contributions) {
-    const month = c.occurred_on.slice(0, 7); // YYYY-MM
-    map.set(month, (map.get(month) ?? 0) + Number(c.amount));
+  const map = new Map<
+    string,
+    { month: string; label: string; total: number }
+  >();
+  for (const item of items) {
+    const key = item.occurred_on.slice(0, 7);
+    const existing = map.get(key);
+    if (existing) {
+      existing.total += Number(item.amount);
+    } else {
+      const date = new Date(key + "-01");
+      map.set(key, {
+        month: key,
+        label: date.toLocaleDateString("es-ES", {
+          month: "long",
+          year: "numeric",
+        }),
+        total: Number(item.amount),
+      });
+    }
   }
-  return Array.from(map.entries())
-    .sort((a, b) => b[0].localeCompare(a[0]))
-    .slice(0, 12)
-    .map(([month, total]) => ({
-      month,
-      total,
-      label: new Date(month + "-01T00:00:00").toLocaleDateString("es-ES", {
-        month: "long",
-        year: "numeric",
-      }),
-    }));
+  return Array.from(map.values()).sort((a, b) =>
+    b.month.localeCompare(a.month)
+  );
 }
