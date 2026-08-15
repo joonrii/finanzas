@@ -9,12 +9,24 @@ export default async function RecurrentesPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Query con debug
-  const { data: recurrings, error } = await supabase
+  // Traer recurrentes SIN join (para evitar el error de relación)
+  const { data: recurrings } = await supabase
     .from("recurring_transactions")
-    .select("*, accounts:account_id(name), categories:category_id(name, icon)")
+    .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
+
+  // Traer cuentas y categorías por separado
+  const [{ data: accounts }, { data: categories }] = await Promise.all([
+    supabase.from("accounts").select("id, name").eq("user_id", user.id),
+    supabase.from("categories").select("id, name, icon").eq("user_id", user.id),
+  ]);
+
+  // Crear mapas para buscar rápido
+  const accountMap = new Map(accounts?.map((a) => [a.id, a.name]) ?? []);
+  const categoryMap = new Map(
+    categories?.map((c) => [c.id, { name: c.name, icon: c.icon }]) ?? []
+  );
 
   return (
     <main className="max-w-lg mx-auto px-5 pt-6 pb-28 safe-bottom">
@@ -27,13 +39,6 @@ export default async function RecurrentesPage() {
           <Plus size={16} />
           Nueva
         </Link>
-      </div>
-
-      {/* DEBUG INFO - Se quitará cuando funcione */}
-      <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400">
-        <p>Usuario: {user.id.slice(0, 8)}...</p>
-        <p>Datos recibidos: {recurrings?.length ?? 0}</p>
-        <p>Error: {error ? error.message : "Ninguno"}</p>
       </div>
 
       {(!recurrings || recurrings.length === 0) && (
@@ -57,9 +62,8 @@ export default async function RecurrentesPage() {
 
       <div className="space-y-3">
         {recurrings?.map((r: any) => {
-          const account = Array.isArray(r.accounts) ? r.accounts[0] : r.accounts;
-          const category = Array.isArray(r.categories) ? r.categories[0] : r.categories;
-          
+          const accountName = accountMap.get(r.account_id) ?? "Cuenta desconocida";
+          const category = categoryMap.get(r.category_id);
           const color = colorForLabel(category?.name ?? "Otro");
           const freqLabel =
             r.frequency === "daily"
@@ -89,7 +93,7 @@ export default async function RecurrentesPage() {
                       {r.description || "Sin descripción"}
                     </p>
                     <p className="text-muted text-xs mt-0.5">
-                      {account?.name} · {freqLabel}
+                      {accountName} · {freqLabel}
                     </p>
                   </div>
                 </div>
