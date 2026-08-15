@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteTransactionButton } from "@/components/transactions/DeleteTransactionButton";
+import { Pencil } from "lucide-react";
+import Link from "next/link";
 import { colorForLabel } from "@/lib/colors";
 
 export default async function MovimientosPage() {
@@ -112,6 +114,14 @@ export default async function MovimientosPage() {
                           {sign}
                           {displayAmount.toFixed(2)} €
                         </p>
+                                              <div className="flex items-center gap-1">
+                        <Link
+                          href={`/movimientos/${t.id}`}
+                          className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 transition-all duration-200 hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90"
+                          aria-label="Editar movimiento"
+                        >
+                          <Pencil className="w-4 h-4" strokeWidth={2} />
+                        </Link>
                         <DeleteTransactionButton
                           id={t.id}
                           accountId={t.account_id}
@@ -119,6 +129,7 @@ export default async function MovimientosPage() {
                           type={t.type}
                           amount={Number(t.amount)}
                         />
+                      </div>
                       </div>
                     </li>
                   );
