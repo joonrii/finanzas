@@ -126,8 +126,8 @@ export default async function CuentaDetallePage({
         {(!contributions || contributions.length === 0) && (
           <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 text-center">
             <p className="text-zinc-500 text-sm">
-              Registra tus aportaciones como movimientos de tipo "Inversión"
-              para ver aquí la rentabilidad real.
+              Registra tus aportaciones como movimientos de tipo "Inversion"
+              para ver aqui la rentabilidad real.
             </p>
           </div>
         )}
@@ -144,4 +144,84 @@ export default async function CuentaDetallePage({
     .limit(5);
 
   return (
-    <div className="flex flex-col
+    <div className="flex flex-col gap-5 animate-fade-in-up">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/cuentas"
+            className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-400 transition-all hover:text-white hover:bg-white/10 active:scale-95"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <h1 className="text-2xl font-bold text-white">{account.name}</h1>
+        </div>
+        <DeleteAccountButton accountId={account.id} />
+      </div>
+
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+        <p className="text-zinc-500 text-sm mb-1">Saldo calculado</p>
+        <p className="money text-3xl font-bold text-white">
+          {calculatedBalance.toFixed(2)} €
+        </p>
+      </div>
+
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+        <p className="text-sm font-medium text-white mb-3">Ajustar saldo</p>
+        <BalanceAdjustmentForm
+          accountId={account.id}
+          calculatedBalance={calculatedBalance}
+        />
+      </div>
+
+      {snapshots && snapshots.length > 0 && (
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+          <p className="text-sm font-medium text-white mb-3">Historial de ajustes</p>
+          <ul className="flex flex-col gap-2">
+            {snapshots.map((s) => (
+              <li
+                key={s.snapshot_date}
+                className="flex justify-between text-sm"
+              >
+                <span className="text-zinc-400">
+                  {new Date(s.snapshot_date).toLocaleDateString("es-ES")}
+                </span>
+                <span className="money text-white">
+                  {Number(s.balance).toFixed(2)} €
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function groupContributionsByMonth(
+  items: { amount: number; occurred_on: string }[]
+) {
+  const map = new Map<
+    string,
+    { month: string; label: string; total: number }
+  >();
+  for (const item of items) {
+    const key = item.occurred_on.slice(0, 7);
+    const existing = map.get(key);
+    if (existing) {
+      existing.total += Number(item.amount);
+    } else {
+      const date = new Date(key + "-01");
+      map.set(key, {
+        month: key,
+        label: date.toLocaleDateString("es-ES", {
+          month: "long",
+          year: "numeric",
+        }),
+        total: Number(item.amount),
+      });
+    }
+  }
+  return Array.from(map.values()).sort((a, b) =>
+    b.month.localeCompare(a.month)
+  );
+}
