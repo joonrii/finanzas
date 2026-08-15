@@ -5,11 +5,12 @@ import { useState } from "react";
 import { DeleteTransactionButton } from "@/components/transactions/DeleteTransactionButton";
 import { Pencil, Download, Receipt } from "lucide-react";
 import { colorForLabel } from "@/lib/colors";
+import type { TransactionType } from "@/types";
 
 interface Transaction {
   id: string;
   amount: number;
-  type: string;
+  type: TransactionType;
   description: string | null;
   merchant: string | null;
   occurred_on: string;
