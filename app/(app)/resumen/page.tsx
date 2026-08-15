@@ -73,7 +73,8 @@ export default async function ResumenPage() {
         <h1 className="text-xl font-medium truncate">{user?.email}</h1>
       </header>
 
-      <div className="bg-surface border border-border rounded-2xl p-5">
+      <div className="relative overflow-hidden bg-surface border border-border rounded-2xl p-5">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-positive via-sky-400 to-fuchsia-400" />
         <p className="text-muted text-sm mb-1">Patrimonio total</p>
         <p className="money text-4xl font-semibold">
           {netWorth.toFixed(2)} €

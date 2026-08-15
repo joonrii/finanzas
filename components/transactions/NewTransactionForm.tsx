@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { createClient } from "@/lib/supabase/client";
 import { suggestCategory, learnFromMerchant } from "@/lib/categorizer";
+import { colorForLabel } from "@/lib/colors";
 import type { Account, Category, TransactionType } from "@/types";
 
 const TYPES: { value: TransactionType; label: string }[] = [
@@ -195,25 +196,35 @@ export function NewTransactionForm({
         <div>
           <p className="text-sm text-muted mb-2">Categoría</p>
           <div className="grid grid-cols-4 gap-2">
-            {visibleCategories.map((c) => (
-              <button
-                type="button"
-                key={c.id}
-                onClick={() => {
-                  setCategoryId(c.id);
-                  setSuggestionNote(null);
-                }}
-                className={clsx(
-                  "flex flex-col items-center gap-1 rounded-xl py-3 border text-[11px]",
-                  categoryId === c.id
-                    ? "bg-positive/10 border-positive text-positive"
-                    : "bg-surface border-border text-muted"
-                )}
-              >
-                <span className="text-lg">{c.icon}</span>
-                {c.name}
-              </button>
-            ))}
+            {visibleCategories.map((c) => {
+              const color = colorForLabel(c.name);
+              return (
+                <button
+                  type="button"
+                  key={c.id}
+                  onClick={() => {
+                    setCategoryId(c.id);
+                    setSuggestionNote(null);
+                  }}
+                  className={clsx(
+                    "flex flex-col items-center gap-1 rounded-xl py-3 border text-[11px]",
+                    categoryId === c.id
+                      ? "bg-positive/10 border-positive text-positive"
+                      : "bg-surface border-border text-muted"
+                  )}
+                >
+                  <span
+                    className={
+                      "w-7 h-7 rounded-full flex items-center justify-center text-sm " +
+                      color.bg
+                    }
+                  >
+                    {c.icon}
+                  </span>
+                  {c.name}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

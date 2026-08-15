@@ -8,6 +8,11 @@
   }
   body {
     -webkit-tap-highlight-color: transparent;
+    background:
+      radial-gradient(ellipse 600px 400px at 15% -5%, rgba(62, 207, 142, 0.08), transparent),
+      radial-gradient(ellipse 500px 350px at 100% 15%, rgba(56, 130, 246, 0.06), transparent),
+      #0B0D10;
+    background-attachment: fixed;
   }
 }
 

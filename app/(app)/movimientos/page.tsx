@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteTransactionButton } from "@/components/transactions/DeleteTransactionButton";
+import { colorForLabel } from "@/lib/colors";
 
 export default async function MovimientosPage() {
   const supabase = await createClient();
@@ -72,7 +73,12 @@ export default async function MovimientosPage() {
                       className="bg-surface border border-border rounded-xl px-4 py-3 flex justify-between items-center"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-lg shrink-0">
+                        <span
+                          className={
+                            "w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0 " +
+                            colorForLabel(category?.name || t.type).bg
+                          }
+                        >
                           {category?.icon ??
                             (t.type === "transfer"
                               ? "↔️"

@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react";
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -73,7 +73,13 @@ export function NetWorthChart({ series }: { series: Point[] }) {
 
       <div className="h-48 -ml-2">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={filtered}>
+          <AreaChart data={filtered}>
+            <defs>
+              <linearGradient id="netWorthFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3ECF8E" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="#3ECF8E" stopOpacity={0} />
+              </linearGradient>
+            </defs>
             <XAxis
               dataKey="date"
               tick={{ fill: "#8B939C", fontSize: 10 }}
@@ -100,14 +106,15 @@ export function NetWorthChart({ series }: { series: Point[] }) {
               }
               formatter={(value: number) => [`${value.toFixed(2)} €`, ""]}
             />
-            <Line
+            <Area
               type="monotone"
               dataKey="value"
               stroke="#3ECF8E"
-              strokeWidth={2}
+              strokeWidth={2.5}
+              fill="url(#netWorthFill)"
               dot={false}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </div>
     </div>
