@@ -15,12 +15,34 @@ export function DeleteAccountButton({ accountId }: { accountId: string }) {
   async function handleDelete() {
     setLoading(true);
 
-    // Borrar la cuenta (las transacciones quedan huérfanas en la DB,
-    // pero como es cuenta de ejemplo no importa. Para producción
-    // podrías marcar is_archived = true en su lugar)
-    await supabase.from("accounts").delete().eq("id", accountId);
+    // 1. Borrar movimientos donde esta cuenta es origen o destino
+    const { error: txError } = await supabase
+      .from("transactions")
+      .delete()
+      .or(`account_id.eq.${accountId},destination_account_id.eq.${accountId}`);
+
+    if (txError) {
+      setLoading(false);
+      toast("Error al borrar movimientos: " + txError.message, "error");
+      return;
+    }
+
+    // 2. Borrar snapshots de balance
+    await supabase.from("balance_snapshots").delete().eq("account_id", accountId);
+
+    // 3. Borrar la cuenta
+    const { error: accError } = await supabase
+      .from("accounts")
+      .delete()
+      .eq("id", accountId);
 
     setLoading(false);
+
+    if (accError) {
+      toast("Error al borrar cuenta: " + accError.message, "error");
+      return;
+    }
+
     router.push("/cuentas");
     router.refresh();
     toast("Cuenta eliminada");
