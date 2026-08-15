@@ -9,7 +9,8 @@ export default async function RecurrentesPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: recurrings } = await supabase
+  // Query con debug
+  const { data: recurrings, error } = await supabase
     .from("recurring_transactions")
     .select("*, accounts:account_id(name), categories:category_id(name, icon)")
     .eq("user_id", user.id)
@@ -26,6 +27,13 @@ export default async function RecurrentesPage() {
           <Plus size={16} />
           Nueva
         </Link>
+      </div>
+
+      {/* DEBUG INFO - Se quitará cuando funcione */}
+      <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400">
+        <p>Usuario: {user.id.slice(0, 8)}...</p>
+        <p>Datos recibidos: {recurrings?.length ?? 0}</p>
+        <p>Error: {error ? error.message : "Ninguno"}</p>
       </div>
 
       {(!recurrings || recurrings.length === 0) && (
@@ -49,7 +57,6 @@ export default async function RecurrentesPage() {
 
       <div className="space-y-3">
         {recurrings?.map((r: any) => {
-          // Supabase devuelve array u objeto dependiendo de la relación
           const account = Array.isArray(r.accounts) ? r.accounts[0] : r.accounts;
           const category = Array.isArray(r.categories) ? r.categories[0] : r.categories;
           
