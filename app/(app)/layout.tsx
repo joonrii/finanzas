@@ -18,7 +18,7 @@ export default async function AppLayout({
   return (
     <div className="min-h-dvh pb-24">
       <Toaster />
-      <div className="max-w-md mx-auto px-4 pt-6">{children}</div>
+      <div className="max-w-md lg:max-w-7xl mx-auto px-4 lg:px-6 pt-6">{children}</div>
       <BottomNav />
     </div>
   );
