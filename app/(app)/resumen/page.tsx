@@ -88,8 +88,9 @@ export default async function ResumenPage() {
   const hasNoTransactions = !monthTransactions || monthTransactions.length === 0;
 
   return (
-    <main className="max-w-lg mx-auto px-5 pt-6 pb-28 safe-bottom lg:max-w-none lg:!mx-0 lg:px-6 lg:pb-8">
-      <div className="lg:grid lg:grid-cols-[280px_1fr_300px] lg:gap-6 lg:pt-6 lg:items-start">
+    <main className="px-5 pt-6 pb-28 safe-bottom lg:px-6 lg:pb-8">
+      <div className="max-w-lg mx-auto lg:max-w-full lg:mx-0">
+        <div className="lg:grid lg:grid-cols-[280px_1fr_300px] lg:gap-6 lg:pt-2 lg:items-start">
 
         {/* ========== COLUMNA IZQUIERDA (solo desktop) ========== */}
         <div className="hidden lg:flex lg:flex-col lg:gap-4">
@@ -231,7 +232,8 @@ export default async function ResumenPage() {
           <NewsFeed />
         </div>
 
-      </div>
+        </div>
+    </div>
     </main>
   );
 }
