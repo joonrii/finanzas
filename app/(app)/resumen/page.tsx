@@ -7,7 +7,7 @@ import { NewsFeed } from "@/components/dashboard/NewsFeed";
 import { TipsWidget } from "@/components/dashboard/TipsWidget";
 import { UpcomingPayments } from "@/components/dashboard/UpcomingPayments";
 import InvestmentReminder from "@/components/investments/InvestmentReminder";
-import { Wallet, TrendingDown, CreditCard, TrendingUp } from "lucide-react";
+import { Wallet, TrendingDown, CreditCard, TrendingUp, Settings } from "lucide-react";
 import Link from "next/link";
 
 export default async function ResumenPage() {
@@ -139,18 +139,28 @@ export default async function ResumenPage() {
 
         {/* ========== COLUMNA CENTRO ========== */}
         <div className="flex flex-col gap-5">
-          <div className="lg:hidden">
-            <p className="text-zinc-500 text-sm">Hola de nuevo</p>
-            <h1 className="text-2xl font-bold text-white truncate">{user?.email}</h1>
+          {/* Header con saludo y icono de ajustes */}
+          <div className="flex items-center justify-between">
+            <div className="lg:hidden">
+              <p className="text-zinc-500 text-sm">Hola de nuevo</p>
+              <h1 className="text-2xl font-bold text-white truncate">{user?.email}</h1>
+            </div>
+            <Link
+              href="/ajustes"
+              className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
+              aria-label="Ajustes"
+            >
+              <Settings className="w-5 h-5" />
+            </Link>
           </div>
 
           {hasNoAccounts ? (
             <EmptyState
               icon={<Wallet className="w-8 h-8 text-zinc-500" />}
-              title="Empieza por anadir una cuenta"
+              title="Empieza por añadir una cuenta"
               description="Necesitas al menos una cuenta para ver tu patrimonio y registrar movimientos."
               actionHref="/cuentas/nueva"
-              actionLabel="Anadir cuenta"
+              actionLabel="Añadir cuenta"
             />
           ) : (
             <>
@@ -198,7 +208,7 @@ export default async function ResumenPage() {
                   title="Aun no hay movimientos este mes"
                   description="Registra tu primer gasto o ingreso para ver el resumen."
                   actionHref="/movimientos/nuevo"
-                  actionLabel="Anadir movimiento"
+                  actionLabel="Añadir movimiento"
                 />
               ) : (
                 <>
