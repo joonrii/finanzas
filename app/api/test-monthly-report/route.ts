@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     await sendMonthlyReport({
       to: email, userName, monthName, year,
       totalIncome, totalExpense, netBalance: totalIncome - totalExpense,
-      topCategories, comparisons: [], insights, upcomingPayments: [], hasTransactions,
+      topCategories, comparisons: [], insights, upcomingPayments: [], hasTransactions: !!hasTransactions,
     });
 
     return NextResponse.json({ success: true, message: `Email de prueba enviado a ${email}` });
