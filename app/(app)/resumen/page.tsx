@@ -88,7 +88,7 @@ export default async function ResumenPage() {
   const hasNoTransactions = !monthTransactions || monthTransactions.length === 0;
 
   return (
-    <main className="max-w-lg mx-auto px-5 pt-6 pb-28 safe-bottom lg:max-w-none lg:mx-0 lg:px-6 lg:pb-8">
+    <main className="max-w-lg mx-auto px-5 pt-6 pb-28 safe-bottom lg:max-w-none lg:!mx-0 lg:px-6 lg:pb-8">
       <div className="lg:grid lg:grid-cols-[280px_1fr_300px] lg:gap-6 lg:pt-6 lg:items-start">
 
         {/* ========== COLUMNA IZQUIERDA (solo desktop) ========== */}
