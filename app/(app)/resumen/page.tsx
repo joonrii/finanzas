@@ -41,6 +41,27 @@ export default async function ResumenPage() {
   const investmentTotal = investmentAccounts.reduce((sum, a) => sum + Number(a.calculated_balance), 0);
   const netWorth = bankTotal + investmentTotal;
 
+  const investmentAccountIds = investmentAccounts.map((a) => a.id);
+  let investmentReturn = 0;
+  let investmentReturnPct = 0;
+  if (investmentAccountIds.length > 0) {
+    const { data: investmentContributions } = await supabase
+      .from("transactions")
+      .select("amount")
+      .eq("user_id", user.id)
+      .eq("type", "investment")
+      .in("account_id", investmentAccountIds);
+
+    const totalContributed = (investmentContributions ?? []).reduce(
+      (sum, t) => sum + Number(t.amount),
+      0
+    );
+
+    investmentReturn = investmentTotal - totalContributed;
+    investmentReturnPct =
+      totalContributed > 0 ? (investmentReturn / totalContributed) * 100 : 0;
+  }
+
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -153,6 +174,18 @@ export default async function ResumenPage() {
                       <p className="text-zinc-500 text-xs">Inversiones</p>
                     </div>
                     <p className="money text-sm font-medium text-white">{investmentTotal.toFixed(2)} €</p>
+                    {investmentAccountIds.length > 0 && (
+                      <p
+                        className={
+                          "money text-[11px] mt-0.5 " +
+                          (investmentReturn >= 0 ? "text-emerald-400" : "text-red-400")
+                        }
+                      >
+                        {investmentReturn >= 0 ? "+" : ""}
+                        {investmentReturn.toFixed(2)} € ({investmentReturnPct >= 0 ? "+" : ""}
+                        {investmentReturnPct.toFixed(1)}%)
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
