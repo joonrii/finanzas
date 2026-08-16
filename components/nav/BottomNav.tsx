@@ -17,7 +17,6 @@ export function BottomNav() {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 safe-bottom">
-      {/* Línea superior sutil */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
       
       <div className="bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/[0.04]">
@@ -26,7 +25,6 @@ export function BottomNav() {
             <NavLink key={item.href} item={item} active={pathname === item.href} />
           ))}
 
-          {/* Botón + flotante */}
           <div className="flex justify-center -mt-5">
             <Link
               href="/movimientos/nuevo"
@@ -71,7 +69,6 @@ function NavLink({
           )} 
           strokeWidth={active ? 2.5 : 1.5} 
         />
-        {/* Punto indicador cuando está activo */}
         {active && (
           <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-emerald-400 animate-fade-in-up" />
         )}
