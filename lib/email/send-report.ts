@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { render } from "@react-email/render";
+import { renderAsync } from "@react-email/render";
 import MonthlyReportEmail from "./templates/MonthlyReport";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -40,7 +40,7 @@ interface SendReportParams {
 export async function sendMonthlyReport(params: SendReportParams) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://finanzas-one-virid.vercel.app";
 
-  const html = await render(
+  const html = await renderAsync(
     MonthlyReportEmail({
       ...params,
       appUrl,
