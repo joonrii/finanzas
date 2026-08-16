@@ -82,7 +82,12 @@ export function DonutChart({ categories }: { categories: CategoryTotal[] }) {
                   fontSize: 11,
                   color: "#fff",
                 }}
-                formatter={(value: number) => [`${value.toFixed(2)} €`, ""]}
+                itemStyle={{ color: "#fff" }}
+                labelStyle={{ color: "#fff" }}
+                formatter={(value: number, name: string) => [
+                  `${value.toFixed(2)} €`,
+                  name,
+                ]}
               />
             </PieChart>
           </ResponsiveContainer>
