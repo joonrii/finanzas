@@ -106,9 +106,9 @@ export async function GET(request: NextRequest) {
           .from("transactions")
           .select("*")
           .eq("user_id", pref.user_id)
-          .gte("date", startOfPrevMonth.toISOString())
-          .lte("date", endOfPrevMonth.toISOString())
-          .order("date", { ascending: false });
+          .gte("occurred_on", startOfPrevMonth.toISOString().slice(0, 10))
+          .lte("occurred_on", endOfPrevMonth.toISOString().slice(0, 10))
+          .order("occurred_on", { ascending: false });
 
         if (txError) {
           results.errors.push(`Error transacciones ${pref.user_id}: ${txError.message}`);
@@ -173,8 +173,8 @@ export async function GET(request: NextRequest) {
           .from("transactions")
           .select("amount, type, category")
           .eq("user_id", pref.user_id)
-          .gte("date", startOfPrevPrevMonth.toISOString())
-          .lte("date", endOfPrevPrevMonth.toISOString());
+          .gte("occurred_on", startOfPrevPrevMonth.toISOString().slice(0, 10))
+          .lte("occurred_on", endOfPrevPrevMonth.toISOString().slice(0, 10));
 
         if (prevPrevTransactions && prevPrevTransactions.length > 0) {
           const prevPrevExpense = prevPrevTransactions
@@ -227,7 +227,7 @@ export async function GET(request: NextRequest) {
           .sort((a, b) => Math.abs(b.amount || 0) - Math.abs(a.amount || 0))[0];
 
         if (biggestExpense) {
-          const day = new Date(biggestExpense.date).getDate();
+          const day = new Date(biggestExpense.occurred_on).getDate();
           insights.push({
             text: `Tu mayor gasto fue de ${formatCurrency(Math.abs(biggestExpense.amount))} en "${biggestExpense.merchant || biggestExpense.category || "desconocido"}" el día ${day}.`,
             emoji: "&#127941;",
@@ -243,7 +243,7 @@ export async function GET(request: NextRequest) {
         transactions
           .filter((t) => t.type === "expense")
           .forEach((t) => {
-            const day = new Date(t.date).getDate();
+            const day = new Date(t.occurred_on).getDate();
             const existing = dayMap.get(day) || { count: 0, total: 0 };
             existing.count++;
             existing.total += Math.abs(t.amount || 0);
