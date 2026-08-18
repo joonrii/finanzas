@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
       .from("transactions")
       .select("*")
       .eq("user_id", userId)
-      .gte("date", startOfMonth.toISOString())
-      .lte("date", endOfMonth.toISOString());
+      .gte("occurred_on", startOfMonth.toISOString().slice(0, 10))
+      .lte("occurred_on", endOfMonth.toISOString().slice(0, 10));
 
     const hasTransactions = transactions && transactions.length > 0;
     let totalIncome = 0, totalExpense = 0;
